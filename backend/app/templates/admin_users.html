@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Users</title>
+  <style>
+    :root { color-scheme: dark; }
+    body {
+      font-family: "Inter", "Segoe UI", sans-serif;
+      margin: 0;
+      min-height: 100vh;
+      background: radial-gradient(circle at top, #1c2c4c, #0a0e1a 55%);
+      color: #f5f7ff;
+    }
+    .layout { padding: 32px; }
+    .glass {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 20px;
+      padding: 24px;
+      backdrop-filter: blur(18px);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+    }
+    a { color: #c7d2ff; text-decoration: none; font-weight: 600; }
+    input {
+      background: rgba(10, 15, 30, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #f5f7ff;
+      padding: 6px 10px;
+      border-radius: 10px;
+    }
+    button {
+      background: rgba(79, 121, 255, 0.8);
+      border: none;
+      color: white;
+      padding: 6px 12px;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 16px;
+    }
+    th, td {
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <div class="glass">
+      <h1>User Management</h1>
+      <a href="/admin?telegram_id={{ telegram_id }}">Back</a>
+      <form method="get">
+        <input type="hidden" name="telegram_id" value="{{ telegram_id }}" />
+        <input name="query" value="{{ query }}" placeholder="Search by ID or username" />
+        <button type="submit">Search</button>
+      </form>
+      <table>
+        <thead>
+          <tr>
+            <th>Telegram ID</th>
+            <th>Username</th>
+            <th>Tokens</th>
+            <th>Banned</th>
+            <th>Update</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for user in users %}
+          <tr>
+            <td>{{ user.telegram_id }}</td>
+            <td>{{ user.username }}</td>
+            <td>
+              <form method="post" action="/admin/users/{{ user.telegram_id }}">
+                <input type="hidden" name="telegram_id" value="{{ telegram_id }}" />
+                <input type="number" name="tokens" value="{{ user.tokens }}" />
+            </td>
+            <td>
+                <input type="checkbox" name="is_banned" {% if user.is_banned %}checked{% endif %} />
+            </td>
+            <td>
+                <button type="submit">Save</button>
+              </form>
+              <form method="post" action="/admin/users/{{ user.telegram_id }}/tasks/toggle" class="task-toggle-form">
+                <input type="hidden" name="telegram_id" value="{{ telegram_id }}" />
+                <input type="number" name="task_id" placeholder="Task ID" />
+                <button type="submit">Toggle Task</button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</body>
+</html>
