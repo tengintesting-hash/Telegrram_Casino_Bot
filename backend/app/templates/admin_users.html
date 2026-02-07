@@ -75,7 +75,7 @@
             <td>{{ user.username }}</td>
             <td>
               <form method="post" action="/admin/users/{{ user.telegram_id }}">
-                <input type="hidden" name="telegram_id" value="{{ telegram_id }}" />
+                <input type="hidden" name="admin_telegram_id" value="{{ telegram_id }}" />
                 <input type="number" name="tokens" value="{{ user.tokens }}" />
             </td>
             <td>
@@ -85,7 +85,7 @@
                 <button type="submit">Save</button>
               </form>
               <form method="post" action="/admin/users/{{ user.telegram_id }}/tasks/toggle" class="task-toggle-form">
-                <input type="hidden" name="telegram_id" value="{{ telegram_id }}" />
+                <input type="hidden" name="admin_telegram_id" value="{{ telegram_id }}" />
                 <input type="number" name="task_id" placeholder="Task ID" />
                 <button type="submit">Toggle Task</button>
               </form>

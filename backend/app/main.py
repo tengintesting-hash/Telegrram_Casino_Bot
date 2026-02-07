@@ -483,11 +483,11 @@ async def admin_users(request: Request, telegram_id: int, query: str = ""):
 @app.post("/admin/users/{telegram_id}")
 async def admin_user_update(
     telegram_id: int,
-    telegram_id: int = Form(...),
+    admin_telegram_id: int = Form(...),
     tokens: int = Form(...),
     is_banned: Optional[str] = Form(None),
 ):
-    require_admin(telegram_id)
+    require_admin(admin_telegram_id)
     banned = is_banned == "on"
     execute(
         """
@@ -495,16 +495,16 @@ async def admin_user_update(
         """,
         {"tokens": tokens, "is_banned": banned, "telegram_id": telegram_id},
     )
-    return RedirectResponse(url=f"/admin/users?telegram_id={telegram_id}", status_code=303)
+    return RedirectResponse(url=f"/admin/users?telegram_id={admin_telegram_id}", status_code=303)
 
 
 @app.post("/admin/users/{telegram_id}/tasks/toggle")
 async def admin_user_task_toggle(
     telegram_id: int,
-    telegram_id: int = Form(...),
+    admin_telegram_id: int = Form(...),
     task_id: int = Form(...),
 ):
-    require_admin(telegram_id)
+    require_admin(admin_telegram_id)
     execute(
         """
         INSERT INTO user_tasks (user_id, task_id, status, enabled)
@@ -514,7 +514,7 @@ async def admin_user_task_toggle(
         """,
         {"telegram_id": telegram_id, "task_id": task_id},
     )
-    return RedirectResponse(url=f"/admin/users?telegram_id={telegram_id}", status_code=303)
+    return RedirectResponse(url=f"/admin/users?telegram_id={admin_telegram_id}", status_code=303)
 
 
 @app.get("/admin/broadcasts", response_class=HTMLResponse)
