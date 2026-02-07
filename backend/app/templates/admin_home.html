@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Admin Panel</title>
+  <style>
+    :root {
+      color-scheme: dark;
+    }
+    body {
+      font-family: "Inter", "Segoe UI", sans-serif;
+      margin: 0;
+      min-height: 100vh;
+      background: radial-gradient(circle at top, #1c2c4c, #0a0e1a 55%);
+      color: #f5f7ff;
+    }
+    .layout {
+      padding: 32px;
+      display: grid;
+      gap: 24px;
+    }
+    .glass {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+      border-radius: 20px;
+      padding: 24px;
+      backdrop-filter: blur(18px);
+    }
+    nav a {
+      margin-right: 12px;
+      color: #c7d2ff;
+      text-decoration: none;
+      font-weight: 600;
+    }
+    nav a:hover {
+      color: #ffffff;
+    }
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(200px, 1fr));
+      gap: 16px;
+      margin-top: 16px;
+    }
+    .card {
+      background: rgba(10, 15, 30, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 16px;
+      border-radius: 16px;
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <div class="glass">
+      <h1>Admin Panel</h1>
+      <nav>
+        <a href="/admin/tasks?telegram_id={{ telegram_id }}">Tasks</a>
+        <a href="/admin/channels?telegram_id={{ telegram_id }}">Channels</a>
+        <a href="/admin/news?telegram_id={{ telegram_id }}">News</a>
+        <a href="/admin/settings?telegram_id={{ telegram_id }}">Settings</a>
+        <a href="/admin/users?telegram_id={{ telegram_id }}">Users</a>
+        <a href="/admin/broadcasts?telegram_id={{ telegram_id }}">Broadcasts</a>
+      </nav>
+      <div class="stats">
+        <div class="card">Total Users: {{ stats.total_users }}</div>
+        <div class="card">Active Users: {{ stats.active_users }}</div>
+        <div class="card">Completed Tasks: {{ stats.completed_tasks }}</div>
+        <div class="card">Token Circulation: {{ stats.token_circulation }}</div>
+        <div class="card">Referrals: {{ stats.referrals }}</div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
