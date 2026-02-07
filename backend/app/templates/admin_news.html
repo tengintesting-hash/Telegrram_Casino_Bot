@@ -3,54 +3,94 @@
 <head>
   <meta charset="UTF-8" />
   <title>News</title>
+  <style>
+    :root { color-scheme: dark; }
+    body {
+      font-family: "Inter", "Segoe UI", sans-serif;
+      margin: 0;
+      min-height: 100vh;
+      background: radial-gradient(circle at top, #1c2c4c, #0a0e1a 55%);
+      color: #f5f7ff;
+    }
+    .layout { padding: 32px; }
+    .glass {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 20px;
+      padding: 24px;
+      backdrop-filter: blur(18px);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+    }
+    a { color: #c7d2ff; text-decoration: none; font-weight: 600; }
+    input, textarea {
+      background: rgba(10, 15, 30, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #f5f7ff;
+      padding: 8px 10px;
+      border-radius: 10px;
+      margin-right: 8px;
+    }
+    button {
+      background: rgba(79, 121, 255, 0.8);
+      border: none;
+      color: white;
+      padding: 8px 14px;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+  </style>
 </head>
 <body>
-  <h1>News Management</h1>
-  <a href="/admin?password={{ password }}">Back</a>
-  <h2>Create News</h2>
-  <form method="post">
-    <input type="hidden" name="password" value="{{ password }}" />
-    <div>
-      <label>Title <input name="title" required></label>
-    </div>
-    <div>
-      <label>Content <textarea name="content"></textarea></label>
-    </div>
-    <div>
-      <label>Media Type <input name="media_type" placeholder="image/video"></label>
-    </div>
-    <div>
-      <label>Media URL <input name="media_url"></label>
-    </div>
-    <div>
-      <label>Button Text <input name="button_text"></label>
-    </div>
-    <div>
-      <label>Button URL <input name="button_url"></label>
-    </div>
-    <button type="submit">Publish</button>
-  </form>
+  <div class="layout">
+    <div class="glass">
+      <h1>News Management</h1>
+      <a href="/admin?telegram_id={{ telegram_id }}">Back</a>
+      <h2>Create News</h2>
+      <form method="post">
+        <input type="hidden" name="telegram_id" value="{{ telegram_id }}" />
+        <div>
+          <label>Title <input name="title" required></label>
+        </div>
+        <div>
+          <label>Content <textarea name="content"></textarea></label>
+        </div>
+        <div>
+          <label>Media Type <input name="media_type" placeholder="image/video"></label>
+        </div>
+        <div>
+          <label>Media URL <input name="media_url"></label>
+        </div>
+        <div>
+          <label>Button Text <input name="button_text"></label>
+        </div>
+        <div>
+          <label>Button URL <input name="button_url"></label>
+        </div>
+        <button type="submit">Publish</button>
+      </form>
 
-  <h2>Existing News</h2>
-  <ul>
-    {% for item in news %}
-      <li>
-        <form method="post" action="/admin/news/{{ item.id }}/update">
-          <input type="hidden" name="password" value="{{ password }}" />
-          <input name="title" value="{{ item.title }}" />
-          <input name="content" value="{{ item.content }}" />
-          <input name="media_type" value="{{ item.media_type }}" />
-          <input name="media_url" value="{{ item.media_url }}" />
-          <input name="button_text" value="{{ item.button_text }}" />
-          <input name="button_url" value="{{ item.button_url }}" />
-          <button type="submit">Update</button>
-        </form>
-        <form method="post" action="/admin/news/{{ item.id }}/delete" style="display:inline;">
-          <input type="hidden" name="password" value="{{ password }}" />
-          <button type="submit">Delete</button>
-        </form>
-      </li>
-    {% endfor %}
-  </ul>
+      <h2>Existing News</h2>
+      <ul>
+        {% for item in news %}
+          <li>
+            <form method="post" action="/admin/news/{{ item.id }}/update">
+              <input type="hidden" name="telegram_id" value="{{ telegram_id }}" />
+              <input name="title" value="{{ item.title }}" />
+              <input name="content" value="{{ item.content }}" />
+              <input name="media_type" value="{{ item.media_type }}" />
+              <input name="media_url" value="{{ item.media_url }}" />
+              <input name="button_text" value="{{ item.button_text }}" />
+              <input name="button_url" value="{{ item.button_url }}" />
+              <button type="submit">Update</button>
+            </form>
+            <form method="post" action="/admin/news/{{ item.id }}/delete" style="display:inline;">
+              <input type="hidden" name="telegram_id" value="{{ telegram_id }}" />
+              <button type="submit">Delete</button>
+            </form>
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
 </body>
 </html>

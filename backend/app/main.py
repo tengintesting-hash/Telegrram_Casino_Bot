@@ -14,7 +14,7 @@ templates = Jinja2Templates(directory="/app/app/templates")
 
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 BOT_USERNAME = os.getenv("BOT_USERNAME")
-ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "admin")
+ADMIN_TELEGRAM_ID = int(os.getenv("ADMIN_TELEGRAM_ID", "0"))
 
 
 def ensure_user(telegram_id: int, username: Optional[str] = None):
@@ -177,14 +177,14 @@ async def list_news():
     return {"news": news_items}
 
 
-def require_admin(password: str):
-    if password != ADMIN_PASSWORD:
+def require_admin(telegram_id: int):
+    if telegram_id != ADMIN_TELEGRAM_ID:
         raise HTTPException(status_code=401, detail="Unauthorized")
 
 
 @app.get("/admin", response_class=HTMLResponse)
-async def admin_home(request: Request, password: str):
-    require_admin(password)
+async def admin_home(request: Request, telegram_id: int):
+    require_admin(telegram_id)
     stats = {
         "total_users": fetch_one("SELECT COUNT(*) AS count FROM users")["count"],
         "active_users": fetch_one("SELECT COUNT(*) AS count FROM users WHERE is_banned = FALSE")["count"],
@@ -192,26 +192,32 @@ async def admin_home(request: Request, password: str):
         "token_circulation": fetch_one("SELECT COALESCE(SUM(tokens),0) AS sum FROM users")["sum"],
         "referrals": fetch_one("SELECT COUNT(*) AS count FROM users WHERE referred_by IS NOT NULL")["count"],
     }
-    return templates.TemplateResponse("admin_home.html", {"request": request, "stats": stats, "password": password})
+    return templates.TemplateResponse(
+        "admin_home.html",
+        {"request": request, "stats": stats, "telegram_id": telegram_id},
+    )
 
 
 @app.get("/admin/tasks", response_class=HTMLResponse)
-async def admin_tasks(request: Request, password: str):
-    require_admin(password)
+async def admin_tasks(request: Request, telegram_id: int):
+    require_admin(telegram_id)
     tasks = fetch_all("SELECT * FROM tasks ORDER BY id")
-    return templates.TemplateResponse("admin_tasks.html", {"request": request, "tasks": tasks, "password": password})
+    return templates.TemplateResponse(
+        "admin_tasks.html",
+        {"request": request, "tasks": tasks, "telegram_id": telegram_id},
+    )
 
 
 @app.post("/admin/tasks")
 async def admin_tasks_create(
-    password: str = Form(...),
+    telegram_id: int = Form(...),
     title: str = Form(...),
     description: str = Form(""),
     task_type: str = Form("registration"),
     rarity: str = Form("Normal"),
     reward_tokens: int = Form(15000),
 ):
-    require_admin(password)
+    require_admin(telegram_id)
     execute(
         """
         INSERT INTO tasks (title, description, task_type, rarity, reward_tokens, is_active)
@@ -225,32 +231,32 @@ async def admin_tasks_create(
             "reward_tokens": reward_tokens,
         },
     )
-    return RedirectResponse(url=f"/admin/tasks?password={password}", status_code=303)
+    return RedirectResponse(url=f"/admin/tasks?telegram_id={telegram_id}", status_code=303)
 
 
 @app.post("/admin/tasks/{task_id}/toggle")
-async def admin_tasks_toggle(task_id: int, password: str = Form(...)):
-    require_admin(password)
+async def admin_tasks_toggle(task_id: int, telegram_id: int = Form(...)):
+    require_admin(telegram_id)
     execute(
         """
         UPDATE tasks SET is_active = NOT is_active WHERE id = %(task_id)s
         """,
         {"task_id": task_id},
     )
-    return RedirectResponse(url=f"/admin/tasks?password={password}", status_code=303)
+    return RedirectResponse(url=f"/admin/tasks?telegram_id={telegram_id}", status_code=303)
 
 
 @app.post("/admin/tasks/{task_id}/update")
 async def admin_tasks_update(
     task_id: int,
-    password: str = Form(...),
+    telegram_id: int = Form(...),
     title: str = Form(...),
     description: str = Form(""),
     task_type: str = Form("registration"),
     rarity: str = Form("Normal"),
     reward_tokens: int = Form(15000),
 ):
-    require_admin(password)
+    require_admin(telegram_id)
     execute(
         """
         UPDATE tasks
@@ -270,31 +276,34 @@ async def admin_tasks_update(
             "task_id": task_id,
         },
     )
-    return RedirectResponse(url=f"/admin/tasks?password={password}", status_code=303)
+    return RedirectResponse(url=f"/admin/tasks?telegram_id={telegram_id}", status_code=303)
 
 
 @app.post("/admin/tasks/{task_id}/delete")
-async def admin_tasks_delete(task_id: int, password: str = Form(...)):
-    require_admin(password)
+async def admin_tasks_delete(task_id: int, telegram_id: int = Form(...)):
+    require_admin(telegram_id)
     execute("DELETE FROM tasks WHERE id = %(task_id)s", {"task_id": task_id})
-    return RedirectResponse(url=f"/admin/tasks?password={password}", status_code=303)
+    return RedirectResponse(url=f"/admin/tasks?telegram_id={telegram_id}", status_code=303)
 
 
 @app.get("/admin/channels", response_class=HTMLResponse)
-async def admin_channels(request: Request, password: str):
-    require_admin(password)
+async def admin_channels(request: Request, telegram_id: int):
+    require_admin(telegram_id)
     channels = fetch_all("SELECT * FROM mandatory_channels ORDER BY id")
-    return templates.TemplateResponse("admin_channels.html", {"request": request, "channels": channels, "password": password})
+    return templates.TemplateResponse(
+        "admin_channels.html",
+        {"request": request, "channels": channels, "telegram_id": telegram_id},
+    )
 
 
 @app.post("/admin/channels")
 async def admin_channels_add(
-    password: str = Form(...),
+    telegram_id: int = Form(...),
     channel_id: int = Form(...),
     channel_title: str = Form(""),
     channel_username: str = Form(""),
 ):
-    require_admin(password)
+    require_admin(telegram_id)
     execute(
         """
         INSERT INTO mandatory_channels (channel_id, channel_title, channel_username)
@@ -306,17 +315,17 @@ async def admin_channels_add(
             "channel_username": channel_username,
         },
     )
-    return RedirectResponse(url=f"/admin/channels?password={password}", status_code=303)
+    return RedirectResponse(url=f"/admin/channels?telegram_id={telegram_id}", status_code=303)
 
 
 @app.post("/admin/channels/{channel_id}/update")
 async def admin_channels_update(
     channel_id: int,
-    password: str = Form(...),
+    telegram_id: int = Form(...),
     channel_title: str = Form(""),
     channel_username: str = Form(""),
 ):
-    require_admin(password)
+    require_admin(telegram_id)
     execute(
         """
         UPDATE mandatory_channels
@@ -325,26 +334,29 @@ async def admin_channels_update(
         """,
         {"channel_title": channel_title, "channel_username": channel_username, "channel_id": channel_id},
     )
-    return RedirectResponse(url=f"/admin/channels?password={password}", status_code=303)
+    return RedirectResponse(url=f"/admin/channels?telegram_id={telegram_id}", status_code=303)
 
 
 @app.post("/admin/channels/{channel_id}/delete")
-async def admin_channels_delete(channel_id: int, password: str = Form(...)):
-    require_admin(password)
+async def admin_channels_delete(channel_id: int, telegram_id: int = Form(...)):
+    require_admin(telegram_id)
     execute("DELETE FROM mandatory_channels WHERE id = %(channel_id)s", {"channel_id": channel_id})
-    return RedirectResponse(url=f"/admin/channels?password={password}", status_code=303)
+    return RedirectResponse(url=f"/admin/channels?telegram_id={telegram_id}", status_code=303)
 
 
 @app.get("/admin/news", response_class=HTMLResponse)
-async def admin_news(request: Request, password: str):
-    require_admin(password)
+async def admin_news(request: Request, telegram_id: int):
+    require_admin(telegram_id)
     news_items = fetch_all("SELECT * FROM news ORDER BY created_at DESC")
-    return templates.TemplateResponse("admin_news.html", {"request": request, "news": news_items, "password": password})
+    return templates.TemplateResponse(
+        "admin_news.html",
+        {"request": request, "news": news_items, "telegram_id": telegram_id},
+    )
 
 
 @app.post("/admin/news")
 async def admin_news_add(
-    password: str = Form(...),
+    telegram_id: int = Form(...),
     title: str = Form(...),
     content: str = Form(""),
     media_type: str = Form(""),
@@ -352,7 +364,7 @@ async def admin_news_add(
     button_text: str = Form(""),
     button_url: str = Form(""),
 ):
-    require_admin(password)
+    require_admin(telegram_id)
     execute(
         """
         INSERT INTO news (title, content, media_type, media_url, button_text, button_url)
@@ -367,13 +379,13 @@ async def admin_news_add(
             "button_url": button_url,
         },
     )
-    return RedirectResponse(url=f"/admin/news?password={password}", status_code=303)
+    return RedirectResponse(url=f"/admin/news?telegram_id={telegram_id}", status_code=303)
 
 
 @app.post("/admin/news/{news_id}/update")
 async def admin_news_update(
     news_id: int,
-    password: str = Form(...),
+    telegram_id: int = Form(...),
     title: str = Form(...),
     content: str = Form(""),
     media_type: str = Form(""),
@@ -381,7 +393,7 @@ async def admin_news_update(
     button_text: str = Form(""),
     button_url: str = Form(""),
 ):
-    require_admin(password)
+    require_admin(telegram_id)
     execute(
         """
         UPDATE news
@@ -403,34 +415,34 @@ async def admin_news_update(
             "news_id": news_id,
         },
     )
-    return RedirectResponse(url=f"/admin/news?password={password}", status_code=303)
+    return RedirectResponse(url=f"/admin/news?telegram_id={telegram_id}", status_code=303)
 
 
 @app.post("/admin/news/{news_id}/delete")
-async def admin_news_delete(news_id: int, password: str = Form(...)):
-    require_admin(password)
+async def admin_news_delete(news_id: int, telegram_id: int = Form(...)):
+    require_admin(telegram_id)
     execute("DELETE FROM news WHERE id = %(news_id)s", {"news_id": news_id})
-    return RedirectResponse(url=f"/admin/news?password={password}", status_code=303)
+    return RedirectResponse(url=f"/admin/news?telegram_id={telegram_id}", status_code=303)
 
 
 @app.get("/admin/settings", response_class=HTMLResponse)
-async def admin_settings(request: Request, password: str):
-    require_admin(password)
+async def admin_settings(request: Request, telegram_id: int):
+    require_admin(telegram_id)
     token_rate = get_setting("token_rate", "1000=0.1")
     support_link = get_setting("support_link", "https://t.me/support")
     return templates.TemplateResponse(
         "admin_settings.html",
-        {"request": request, "token_rate": token_rate, "support_link": support_link, "password": password},
+        {"request": request, "token_rate": token_rate, "support_link": support_link, "telegram_id": telegram_id},
     )
 
 
 @app.post("/admin/settings")
 async def admin_settings_update(
-    password: str = Form(...),
+    telegram_id: int = Form(...),
     token_rate: str = Form(...),
     support_link: str = Form(...),
 ):
-    require_admin(password)
+    require_admin(telegram_id)
     execute(
         """
         INSERT INTO settings (key, value) VALUES ('token_rate', %(token_rate)s)
@@ -445,12 +457,12 @@ async def admin_settings_update(
         """,
         {"support_link": support_link},
     )
-    return RedirectResponse(url=f"/admin/settings?password={password}", status_code=303)
+    return RedirectResponse(url=f"/admin/settings?telegram_id={telegram_id}", status_code=303)
 
 
 @app.get("/admin/users", response_class=HTMLResponse)
-async def admin_users(request: Request, password: str, query: str = ""):
-    require_admin(password)
+async def admin_users(request: Request, telegram_id: int, query: str = ""):
+    require_admin(telegram_id)
     if query:
         users = fetch_all(
             """
@@ -462,17 +474,20 @@ async def admin_users(request: Request, password: str, query: str = ""):
         )
     else:
         users = fetch_all("SELECT * FROM users ORDER BY created_at DESC LIMIT 50")
-    return templates.TemplateResponse("admin_users.html", {"request": request, "users": users, "password": password, "query": query})
+    return templates.TemplateResponse(
+        "admin_users.html",
+        {"request": request, "users": users, "telegram_id": telegram_id, "query": query},
+    )
 
 
 @app.post("/admin/users/{telegram_id}")
 async def admin_user_update(
     telegram_id: int,
-    password: str = Form(...),
+    telegram_id: int = Form(...),
     tokens: int = Form(...),
     is_banned: Optional[str] = Form(None),
 ):
-    require_admin(password)
+    require_admin(telegram_id)
     banned = is_banned == "on"
     execute(
         """
@@ -480,16 +495,16 @@ async def admin_user_update(
         """,
         {"tokens": tokens, "is_banned": banned, "telegram_id": telegram_id},
     )
-    return RedirectResponse(url=f"/admin/users?password={password}", status_code=303)
+    return RedirectResponse(url=f"/admin/users?telegram_id={telegram_id}", status_code=303)
 
 
 @app.post("/admin/users/{telegram_id}/tasks/toggle")
 async def admin_user_task_toggle(
     telegram_id: int,
-    password: str = Form(...),
+    telegram_id: int = Form(...),
     task_id: int = Form(...),
 ):
-    require_admin(password)
+    require_admin(telegram_id)
     execute(
         """
         INSERT INTO user_tasks (user_id, task_id, status, enabled)
@@ -499,25 +514,28 @@ async def admin_user_task_toggle(
         """,
         {"telegram_id": telegram_id, "task_id": task_id},
     )
-    return RedirectResponse(url=f"/admin/users?password={password}", status_code=303)
+    return RedirectResponse(url=f"/admin/users?telegram_id={telegram_id}", status_code=303)
 
 
 @app.get("/admin/broadcasts", response_class=HTMLResponse)
-async def admin_broadcasts(request: Request, password: str):
-    require_admin(password)
-    return templates.TemplateResponse("admin_broadcasts.html", {"request": request, "password": password})
+async def admin_broadcasts(request: Request, telegram_id: int):
+    require_admin(telegram_id)
+    return templates.TemplateResponse(
+        "admin_broadcasts.html",
+        {"request": request, "telegram_id": telegram_id},
+    )
 
 
 @app.post("/admin/broadcasts")
 async def admin_broadcasts_send(
-    password: str = Form(...),
+    telegram_id: int = Form(...),
     message: str = Form(...),
     media_type: str = Form(""),
     media_url: str = Form(""),
     button_text: str = Form(""),
     button_url: str = Form(""),
 ):
-    require_admin(password)
+    require_admin(telegram_id)
     users = fetch_all("SELECT telegram_id FROM users WHERE is_banned = FALSE")
     reply_markup = None
     if button_url:
@@ -555,9 +573,9 @@ async def admin_broadcasts_send(
                 },
                 timeout=10,
             )
-    return RedirectResponse(url=f"/admin/broadcasts?password={password}", status_code=303)
+    return RedirectResponse(url=f"/admin/broadcasts?telegram_id={telegram_id}", status_code=303)
 
 
 @app.post("/admin/login")
-async def admin_login(password: str = Form(...)):
-    return RedirectResponse(url=f"/admin?password={password}", status_code=303)
+async def admin_login(telegram_id: int = Form(...)):
+    return RedirectResponse(url=f"/admin?telegram_id={telegram_id}", status_code=303)

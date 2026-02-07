@@ -3,19 +3,59 @@
 <head>
   <meta charset="UTF-8" />
   <title>Settings</title>
+  <style>
+    :root { color-scheme: dark; }
+    body {
+      font-family: "Inter", "Segoe UI", sans-serif;
+      margin: 0;
+      min-height: 100vh;
+      background: radial-gradient(circle at top, #1c2c4c, #0a0e1a 55%);
+      color: #f5f7ff;
+    }
+    .layout { padding: 32px; }
+    .glass {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 20px;
+      padding: 24px;
+      backdrop-filter: blur(18px);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+    }
+    a { color: #c7d2ff; text-decoration: none; font-weight: 600; }
+    input {
+      background: rgba(10, 15, 30, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #f5f7ff;
+      padding: 8px 10px;
+      border-radius: 10px;
+      margin-right: 8px;
+    }
+    button {
+      background: rgba(79, 121, 255, 0.8);
+      border: none;
+      color: white;
+      padding: 8px 14px;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+  </style>
 </head>
 <body>
-  <h1>Global Settings</h1>
-  <a href="/admin?password={{ password }}">Back</a>
-  <form method="post">
-    <input type="hidden" name="password" value="{{ password }}" />
-    <div>
-      <label>Token Rate <input name="token_rate" value="{{ token_rate }}"></label>
+  <div class="layout">
+    <div class="glass">
+      <h1>Global Settings</h1>
+      <a href="/admin?telegram_id={{ telegram_id }}">Back</a>
+      <form method="post">
+        <input type="hidden" name="telegram_id" value="{{ telegram_id }}" />
+        <div>
+          <label>Token Rate <input name="token_rate" value="{{ token_rate }}"></label>
+        </div>
+        <div>
+          <label>Support Link <input name="support_link" value="{{ support_link }}"></label>
+        </div>
+        <button type="submit">Save</button>
+      </form>
     </div>
-    <div>
-      <label>Support Link <input name="support_link" value="{{ support_link }}"></label>
-    </div>
-    <button type="submit">Save</button>
-  </form>
+  </div>
 </body>
 </html>
