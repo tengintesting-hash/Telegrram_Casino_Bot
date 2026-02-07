@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Channels</title>
+</head>
+<body>
+  <h1>Mandatory Channels</h1>
+  <a href="/admin?password={{ password }}">Back</a>
+  <h2>Add Channel</h2>
+  <form method="post">
+    <input type="hidden" name="password" value="{{ password }}" />
+    <div>
+      <label>Channel ID <input name="channel_id" type="number" required></label>
+    </div>
+    <div>
+      <label>Title <input name="channel_title"></label>
+    </div>
+    <div>
+      <label>Username <input name="channel_username"></label>
+    </div>
+    <button type="submit">Add</button>
+  </form>
+
+  <h2>Existing Channels</h2>
+  <ul>
+    {% for channel in channels %}
+      <li>
+        <form method="post" action="/admin/channels/{{ channel.id }}/update">
+          <input type="hidden" name="password" value="{{ password }}" />
+          <span>ID {{ channel.channel_id }}</span>
+          <input name="channel_title" value="{{ channel.channel_title }}" />
+          <input name="channel_username" value="{{ channel.channel_username }}" />
+          <button type="submit">Update</button>
+        </form>
+        <form method="post" action="/admin/channels/{{ channel.id }}/delete" style="display:inline;">
+          <input type="hidden" name="password" value="{{ password }}" />
+          <button type="submit">Delete</button>
+        </form>
+      </li>
+    {% endfor %}
+  </ul>
+</body>
+</html>

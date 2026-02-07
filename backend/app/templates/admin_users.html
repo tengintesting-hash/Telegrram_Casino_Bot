@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Users</title>
+</head>
+<body>
+  <h1>User Management</h1>
+  <a href="/admin?password={{ password }}">Back</a>
+  <form method="get">
+    <input type="hidden" name="password" value="{{ password }}" />
+    <input name="query" value="{{ query }}" placeholder="Search by ID or username" />
+    <button type="submit">Search</button>
+  </form>
+  <table border="1" cellpadding="4">
+    <thead>
+      <tr>
+        <th>Telegram ID</th>
+        <th>Username</th>
+        <th>Tokens</th>
+        <th>Banned</th>
+        <th>Update</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for user in users %}
+      <tr>
+        <td>{{ user.telegram_id }}</td>
+        <td>{{ user.username }}</td>
+        <td>
+          <form method="post" action="/admin/users/{{ user.telegram_id }}">
+            <input type="hidden" name="password" value="{{ password }}" />
+            <input type="number" name="tokens" value="{{ user.tokens }}" />
+        </td>
+        <td>
+            <input type="checkbox" name="is_banned" {% if user.is_banned %}checked{% endif %} />
+        </td>
+        <td>
+            <button type="submit">Save</button>
+          </form>
+          <form method="post" action="/admin/users/{{ user.telegram_id }}/tasks/toggle" class="task-toggle-form">
+            <input type="hidden" name="password" value="{{ password }}" />
+            <input type="number" name="task_id" placeholder="Task ID" />
+            <button type="submit">Toggle Task</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</body>
+</html>
