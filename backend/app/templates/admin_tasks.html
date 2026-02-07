@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Tasks</title>
+  <style>
+    :root { color-scheme: dark; }
+    body {
+      font-family: "Inter", "Segoe UI", sans-serif;
+      margin: 0;
+      min-height: 100vh;
+      background: radial-gradient(circle at top, #1c2c4c, #0a0e1a 55%);
+      color: #f5f7ff;
+    }
+    .layout { padding: 32px; }
+    .glass {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 20px;
+      padding: 24px;
+      backdrop-filter: blur(18px);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+    }
+    a { color: #c7d2ff; text-decoration: none; font-weight: 600; }
+    form { margin-top: 12px; }
+    input, select {
+      background: rgba(10, 15, 30, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #f5f7ff;
+      padding: 8px 10px;
+      border-radius: 10px;
+      margin-right: 8px;
+    }
+    button {
+      background: rgba(79, 121, 255, 0.8);
+      border: none;
+      color: white;
+      padding: 8px 14px;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+    .list-item { margin-bottom: 16px; }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <div class="glass">
+      <h1>Tasks</h1>
+      <a href="/admin?telegram_id={{ telegram_id }}">Back</a>
+      <h2>Create Task</h2>
+      <form method="post">
+        <input type="hidden" name="telegram_id" value="{{ telegram_id }}" />
+        <div>
+          <label>Title <input name="title" required></label>
+        </div>
+        <div>
+          <label>Description <input name="description"></label>
+        </div>
+        <div>
+          <label>Task Type
+            <select name="task_type">
+              <option value="registration">Registration</option>
+              <option value="deposit">Deposit</option>
+            </select>
+          </label>
+        </div>
+        <div>
+          <label>Rarity
+            <select name="rarity">
+              <option>Normal</option>
+              <option>Limited</option>
+            </select>
+          </label>
+        </div>
+        <div>
+          <label>Reward Tokens <input name="reward_tokens" type="number" value="15000"></label>
+        </div>
+        <button type="submit">Create</button>
+      </form>
+
+      <h2>Existing Tasks</h2>
+      <ul>
+        {% for task in tasks %}
+          <li class="list-item">
+            <form method="post" action="/admin/tasks/{{ task.id }}/update">
+              <input type="hidden" name="telegram_id" value="{{ telegram_id }}" />
+              <input name="title" value="{{ task.title }}" />
+              <input name="description" value="{{ task.description }}" />
+              <select name="task_type">
+                <option value="registration" {% if task.task_type == 'registration' %}selected{% endif %}>Registration</option>
+                <option value="deposit" {% if task.task_type == 'deposit' %}selected{% endif %}>Deposit</option>
+              </select>
+              <select name="rarity">
+                <option {% if task.rarity == 'Normal' %}selected{% endif %}>Normal</option>
+                <option {% if task.rarity == 'Limited' %}selected{% endif %}>Limited</option>
+              </select>
+              <input name="reward_tokens" type="number" value="{{ task.reward_tokens }}" />
+              <button type="submit">Update</button>
+            </form>
+            <form method="post" action="/admin/tasks/{{ task.id }}/toggle" style="display:inline;">
+              <input type="hidden" name="telegram_id" value="{{ telegram_id }}" />
+              <button type="submit">{{ 'Disable' if task.is_active else 'Enable' }}</button>
+            </form>
+            <form method="post" action="/admin/tasks/{{ task.id }}/delete" style="display:inline;">
+              <input type="hidden" name="telegram_id" value="{{ telegram_id }}" />
+              <button type="submit">Delete</button>
+            </form>
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+</body>
+</html>
