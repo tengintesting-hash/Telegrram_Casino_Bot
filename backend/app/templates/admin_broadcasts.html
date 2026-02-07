@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Broadcasts</title>
+</head>
+<body>
+  <h1>Bot Broadcasts</h1>
+  <a href="/admin?password={{ password }}">Back</a>
+  <form method="post">
+    <input type="hidden" name="password" value="{{ password }}" />
+    <div>
+      <label>Message <textarea name="message" required></textarea></label>
+    </div>
+    <div>
+      <label>Media Type <input name="media_type" placeholder="image/video"></label>
+    </div>
+    <div>
+      <label>Media URL <input name="media_url"></label>
+    </div>
+    <div>
+      <label>Button Text <input name="button_text"></label>
+    </div>
+    <div>
+      <label>Button URL <input name="button_url"></label>
+    </div>
+    <button type="submit">Send</button>
+  </form>
+</body>
+</html>
