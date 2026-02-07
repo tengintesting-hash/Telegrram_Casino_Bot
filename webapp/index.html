@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Telegram Casino WebApp</title>
+  <link rel="stylesheet" href="styles.css" />
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+</head>
+<body>
+  <div id="subscription-block" class="hidden">
+    <h2>Subscribe to continue</h2>
+    <p>Please join all mandatory channels to access the app.</p>
+    <div id="channel-links"></div>
+  </div>
+
+  <div id="app" class="hidden">
+    <header>
+      <h1>Casino Hub</h1>
+    </header>
+
+    <main>
+      <section id="home" class="page active">
+        <h2>Tasks</h2>
+        <div id="tasks"></div>
+      </section>
+
+      <section id="profile" class="page">
+        <h2>Profile</h2>
+        <div id="profile-info"></div>
+        <button id="support-button">Technical Support</button>
+      </section>
+
+      <section id="news" class="page">
+        <h2>Promo Codes & News</h2>
+        <div id="news-list"></div>
+      </section>
+    </main>
+
+    <nav class="bottom-nav">
+      <button data-page="home">Home</button>
+      <button data-page="profile">Profile</button>
+      <button data-page="news">Promo Codes & News</button>
+    </nav>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
